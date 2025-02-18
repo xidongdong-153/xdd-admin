@@ -9,6 +9,16 @@
 
 		<!-- 右侧用户信息 -->
 		<div class="flex items-center space-x-4">
+			<!-- AI提问模板 -->
+			<el-tooltip content="AI提问模板" placement="bottom">
+				<button
+					class="rounded-lg p-2 transition-all hover:bg-gray-100 dark:hover:bg-gray-700"
+					@click="router.push('/prompt-template')"
+				>
+					<el-icon><ChatDotRound class="dark:text-white" /></el-icon>
+				</button>
+			</el-tooltip>
+
 			<!-- 主题切换 -->
 			<button
 				class="rounded-lg p-2 transition-all hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -55,8 +65,9 @@ import {
 	ElAvatar,
 	ElIcon,
 	ElMessage,
+	ElTooltip,
 } from "element-plus";
-import { Moon, Sunny, User, SwitchButton } from "@element-plus/icons-vue";
+import { Moon, Sunny, User, SwitchButton, ChatDotRound } from "@element-plus/icons-vue";
 import { useDark, useToggle } from "@vueuse/core";
 import { useAuthStore } from "@/stores/modules/auth";
 import { useUserStore } from "@/stores/modules/user";

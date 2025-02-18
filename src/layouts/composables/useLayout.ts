@@ -49,7 +49,7 @@ const useLayout = (
 
 	// 主题配置
 	const themeConfig = ref<LayoutThemeConfig>({
-		darkMode: false,
+		darkMode: localStorage.getItem("darkMode") === "true",
 		compact: false,
 	});
 
@@ -81,6 +81,10 @@ const useLayout = (
 			...themeConfig.value,
 			...config,
 		};
+		// 持久化暗黑模式状态
+		if (config.darkMode !== undefined) {
+			localStorage.setItem("darkMode", config.darkMode.toString());
+		}
 	};
 
 	return {

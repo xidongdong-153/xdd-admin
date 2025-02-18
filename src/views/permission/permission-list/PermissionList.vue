@@ -1,3 +1,7 @@
 <template>
-	<div>权限管理</div>
+	<SearchContent />
 </template>
+
+<script setup lang="ts">
+import SearchContent from "./components/search-content/SearchContent.vue";
+</script>

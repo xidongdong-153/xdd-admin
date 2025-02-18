@@ -26,13 +26,19 @@ export const RoleApi = {
 	/**
 	 * 更新角色
 	 */
-	update(data: RoleInfo) {
-		return request.patch<RoleInfo>(`/api/roles/${data.id}`, data);
+	update(id: number, data: Partial<RoleInfo>) {
+		return request.patch<RoleInfo>(`/api/roles/${id}`, data);
 	},
 	/**
 	 * 删除角色
 	 */
 	delete(id: number) {
 		return request.delete<RoleInfo>(`/api/roles/${id}`);
+	},
+	/**
+	 * 分配权限
+	 */
+	assignPermissions(id: number, data: { permissions: number[] }) {
+		return request.post<RoleInfo>(`/api/roles/${id}/permissions`, data);
 	},
 };

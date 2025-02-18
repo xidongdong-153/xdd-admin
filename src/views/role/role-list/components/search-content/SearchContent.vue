@@ -11,16 +11,14 @@
 		</div>
 
 		<div class="min-h-0 flex-1">
-			<ContentList :config="listConfig" @add="handleAdd" ref="contentListRef" />
+			<ContentList :config="listConfig" ref="contentListRef" />
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import type { RoleInfo, RoleListRequest } from "@/api/modules/role/types";
-import { ElMessage, ElMessageBox } from "element-plus";
-import { RoleApi } from "@/api/modules/role/role-api";
+import type { RoleInfo, RoleListRequest, CreateRole } from "@/api/modules/role/types";
 import type { ContentListConfig } from "@/components/business/search-list/types";
 import { ContentList, SearchCondition } from "@/components/business/search-list";
 import type { ComponentPublicInstance } from "vue";
@@ -41,9 +39,8 @@ type RoleContentList = ComponentPublicInstance & {
 const contentListRef = ref<RoleContentList>();
 
 // 搜索表单数据
-const searchForm = ref<SearchForm>({
+const searchForm = ref<Pick<SearchForm, "name">>({
 	name: "",
-	description: "",
 });
 
 // 表单配置
@@ -55,7 +52,7 @@ const rules = computed(() => generateRules(formConfig.value));
 /**
  * 过滤空值参数
  */
-const filterEmptyParams = (params: SearchForm): Partial<RoleListRequest> => {
+const filterEmptyParams = (params: Pick<SearchForm, "name">): Partial<RoleListRequest> => {
 	return Object.fromEntries(
 		Object.entries(params).filter(([, value]) => value !== ""),
 	) as Partial<RoleListRequest>;
@@ -71,7 +68,6 @@ const handleReset = () => {
 	// 1. 重置响应式表单数据
 	searchForm.value = {
 		name: "",
-		description: "",
 	};
 
 	// 2. 重置搜索参数并刷新数据
@@ -79,33 +75,7 @@ const handleReset = () => {
 };
 
 // 列表配置
-const listConfig = computed<ContentListConfig<RoleInfo, RoleListRequest>>(() =>
-	getListConfig(handleEdit, handleDelete),
+const listConfig = computed<ContentListConfig<RoleInfo, RoleListRequest, CreateRole>>(() =>
+	getListConfig(),
 );
-
-// 处理方法
-const handleAdd = () => {
-	// TODO: 实现新增角色
-	console.log("新增角色");
-};
-
-const handleEdit = (row: RoleInfo) => {
-	// TODO: 实现编辑角色
-	console.log("编辑角色", row);
-};
-
-const handleDelete = async (row: RoleInfo) => {
-	try {
-		await ElMessageBox.confirm("确认删除该角色?", "提示", {
-			type: "warning",
-			confirmButtonText: "确定",
-			cancelButtonText: "取消",
-		});
-		await RoleApi.delete(row.id);
-		ElMessage.success("删除成功");
-		contentListRef.value?.refresh();
-	} catch {
-		// 错误已经被统一处理
-	}
-};
 </script>

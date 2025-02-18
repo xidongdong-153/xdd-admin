@@ -1,18 +1,18 @@
 import { h } from "vue";
 import { ElTag } from "element-plus";
 import type { ContentListConfig } from "@/components/business/search-list/types";
-import type { RoleInfo, RoleListRequest } from "@/api/modules/role/types";
+import type { RoleInfo, RoleListRequest, CreateRole } from "@/api/modules/role/types";
 import { RoleApi } from "@/api/modules/role/role-api";
+import { getCreateFormConfig } from "./form.config";
 
 // 获取列表配置
-export const getListConfig = (
-	handleEdit: (row: RoleInfo) => void,
-	handleDelete: (row: RoleInfo) => void,
-): ContentListConfig<RoleInfo, RoleListRequest> => ({
+export const getListConfig = (): ContentListConfig<RoleInfo, RoleListRequest, CreateRole> => ({
 	// API 配置
 	api: {
 		getList: RoleApi.getList,
 		delete: RoleApi.delete,
+		create: RoleApi.create,
+		update: RoleApi.update,
 	},
 
 	// 查询参数
@@ -39,26 +39,24 @@ export const getListConfig = (
 		{ prop: "createdAt", label: "创建时间", visible: true },
 	],
 
-	// 操作按钮
-	actions: [
-		{
-			label: "编辑",
-			type: "primary",
-			onClick: handleEdit,
-			show: (row) => !row.isSystem,
-		},
-		{
-			label: "删除",
-			type: "danger",
-			onClick: handleDelete,
-			show: (row) => !row.isSystem,
-		},
-	],
-
 	// 工具栏配置
 	toolbar: {
 		showAdd: true,
 		showRefresh: true,
 		showColumnSetting: true,
 	},
+
+	// 表单配置
+	formConfig: getCreateFormConfig(),
+
+	// 控制系统角色不允许编辑和删除
+	showActions: true,
+	actions: [
+		// {
+		// 	label: "编辑",
+		// 	type: "primary",
+		// 	onClick: () => {}, // 使用内置编辑功能，这里仅用于控制显示
+		// 	show: (row) => !row.isSystem,
+		// },
+	],
 });

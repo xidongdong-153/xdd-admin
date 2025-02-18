@@ -125,11 +125,15 @@ interface ActionButton<T> {
 /**
  * API 方法接口
  */
-interface ApiMethods<T, Q extends PaginationQuery> {
+interface ApiMethods<T, Q extends PaginationQuery, C = T> {
 	/** 获取列表 */
 	getList: (params: Q) => Promise<HttpResponse<PaginatedData<T>>>;
 	/** 删除记录 */
 	delete?: (id: number) => Promise<HttpResponse<T>>;
+	/** 新增记录 */
+	create?: (data: C) => Promise<HttpResponse<T>>;
+	/** 更新记录 */
+	update?: (id: number, data: Partial<T>) => Promise<HttpResponse<T>>;
 }
 
 /**
@@ -147,17 +151,33 @@ interface ToolbarConfig {
 /**
  * 内容列表配置
  */
-interface ContentListConfig<T, Q extends PaginationQuery> {
+interface ContentListConfig<T extends { id: number }, Q extends PaginationQuery, C = T> {
 	/** 列配置 */
 	columns: ColumnConfig<T>[];
 	/** API 方法 */
-	api: ApiMethods<T, Q>;
+	api: ApiMethods<T, Q, C>;
 	/** 查询参数 */
 	queryParams: Q;
 	/** 操作按钮 */
 	actions?: ActionButton<T>[];
 	/** 工具栏配置 */
 	toolbar?: ToolbarConfig;
+	/** 表单配置 */
+	formConfig?: FormConfig<C>;
+	/** 是否显示操作列 */
+	showActions?: boolean;
+}
+
+/**
+ * 表单配置
+ */
+interface FormConfig<T> {
+	/** 表单字段配置 */
+	fields: FormItemConfig<T>[];
+	/** 表单验证规则 */
+	rules?: Record<keyof T, FormRule[]>;
+	/** 表单宽度 */
+	width?: string | number;
 }
 
 export type {
@@ -176,4 +196,5 @@ export type {
 	ApiMethods,
 	ToolbarConfig,
 	ContentListConfig,
+	FormConfig,
 };

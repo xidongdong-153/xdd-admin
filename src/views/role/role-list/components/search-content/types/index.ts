@@ -2,6 +2,7 @@
 export interface SearchForm {
 	name: string;
 	description: string;
+	permissions?: string[];
 }
 
 // 表格数据类型

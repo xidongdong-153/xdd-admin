@@ -7,7 +7,7 @@
 				type="primary"
 				:icon="Plus"
 				size="small"
-				@click="emit('add')"
+				@click="handleAdd"
 			>
 				新增
 			</el-button>
@@ -77,7 +77,7 @@
 
 				<!-- 操作列 -->
 				<el-table-column
-					v-if="config.actions?.length"
+					v-if="config.showActions !== false"
 					fixed="right"
 					label="操作"
 					:width="actionWidth"
@@ -85,15 +85,23 @@
 				>
 					<template #default="{ row }">
 						<el-space :size="4">
-							<el-button
-								v-for="action in config.actions"
-								:key="action.label"
-								:type="action.type || 'primary'"
-								link
-								@click="action.onClick(row)"
-							>
-								{{ action.label }}
+							<el-button v-if="config.api.update" type="primary" link @click="handleEdit(row)">
+								编辑
 							</el-button>
+							<el-button v-if="config.api.delete" type="danger" link @click="handleDelete(row)">
+								删除
+							</el-button>
+							<template v-if="config.actions?.length">
+								<el-button
+									v-for="action in config.actions"
+									:key="action.label"
+									:type="action.type || 'primary'"
+									link
+									@click="action.onClick(row)"
+								>
+									{{ action.label }}
+								</el-button>
+							</template>
 						</el-space>
 					</template>
 				</el-table-column>
@@ -113,18 +121,40 @@
 				@current-change="handleCurrentChange"
 			/>
 		</div>
+
+		<!-- 表单抽屉 -->
+		<form-drawer
+			v-if="currentFormConfig"
+			v-model="showFormDrawer"
+			:title="drawerTitle"
+			:form-config="currentFormConfig"
+			:initial-data="currentFormData"
+			@submit="handleFormSubmit"
+		/>
 	</div>
 </template>
 
-<script setup lang="ts" generic="T, Q extends PaginationQuery">
+<script
+	setup
+	lang="ts"
+	generic="
+		T extends { id: number } & Record<string, any>,
+		Q extends PaginationQuery,
+		C extends { id?: number } & Record<string, any> = T
+	"
+>
 import { computed, ref, watch } from "vue";
 import type { ContentListConfig } from "../types";
 import type { PaginatedData, PaginationQuery } from "@/api/core/types";
 import { useRequest } from "@/hooks/useRequest";
 import { Plus, Refresh, Setting, ArrowDown } from "@element-plus/icons-vue";
+import FormDrawer from "../form-drawer/FormDrawer.vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import type { FormItemRule } from "element-plus";
+import type { FormConfig, FormItemConfig } from "../types";
 
 const props = defineProps<{
-	config: ContentListConfig<T, Q>;
+	config: ContentListConfig<T, Q, C>;
 }>();
 
 const emit = defineEmits<{
@@ -140,7 +170,9 @@ const showToolbar = computed<boolean>(() => {
 
 // 计算操作列宽度
 const actionWidth = computed(() => {
-	return (props.config.actions?.length || 0) * 60 + 20;
+	const baseWidth = 150; // 基础宽度
+	const customActionsWidth = (props.config.actions?.length || 0) * 60;
+	return baseWidth + customActionsWidth;
 });
 
 // 计算可见列
@@ -226,6 +258,116 @@ const handleSizeChange = (size: number) => {
 // 刷新数据
 const handleRefresh = () => {
 	fetchData();
+};
+
+// 表单抽屉相关
+const showFormDrawer = ref(false);
+const drawerTitle = ref("");
+const currentFormData = ref<Partial<C>>();
+const currentFormConfig = ref<typeof props.config.formConfig>();
+
+// 处理表单配置
+const handleFormConfig = (isEdit: boolean) => {
+	if (!props.config.formConfig) return;
+
+	// 深拷贝表单配置
+	const formConfig = JSON.parse(JSON.stringify(props.config.formConfig)) as FormConfig<C>;
+
+	// 编辑模式下移除必填校验
+	if (isEdit) {
+		// 处理字段级别的规则
+		formConfig.fields.forEach((field: FormItemConfig<C>) => {
+			if (field.rules) {
+				field.rules = field.rules.filter((rule: FormItemRule) => !rule.required);
+			}
+		});
+
+		// 处理表单级别的规则
+		if (formConfig.rules) {
+			const rules = { ...formConfig.rules };
+			Object.keys(rules).forEach((key) => {
+				const fieldRules = rules[key as keyof C];
+				if (Array.isArray(fieldRules)) {
+					rules[key as keyof C] = fieldRules.filter((rule: FormItemRule) => !rule.required);
+				}
+			});
+			formConfig.rules = rules;
+		}
+	}
+
+	currentFormConfig.value = formConfig;
+};
+
+// 内置编辑方法
+const handleEdit = (row: T) => {
+	drawerTitle.value = "编辑";
+	// 只保留表单配置中定义的字段
+	const formFields = props.config.formConfig?.fields.map((field) => field.field) || [];
+	const filteredData = Object.fromEntries(
+		Object.entries(row).filter(([key]) => formFields.includes(key as keyof C)),
+	);
+	currentFormData.value = filteredData as C;
+	handleFormConfig(true);
+	showFormDrawer.value = true;
+};
+
+// 内置删除方法
+const handleDelete = async (row: T) => {
+	if (!props.config.api.delete) {
+		ElMessage.warning("未配置删除接口");
+		return;
+	}
+
+	try {
+		await ElMessageBox.confirm("确认删除该记录吗？", "提示", {
+			type: "warning",
+		});
+
+		await props.config.api.delete(row.id);
+		ElMessage.success("删除成功");
+		fetchData();
+	} catch {
+		// 用户取消删除或删除失败，不做处理
+	}
+};
+
+// 内置新增方法
+const handleAdd = () => {
+	if (!props.config.api.create) {
+		ElMessage.warning("未配置新增接口");
+		return;
+	}
+	drawerTitle.value = "新增";
+	currentFormData.value = {};
+	handleFormConfig(false);
+	showFormDrawer.value = true;
+};
+
+// 表单提交处理
+const handleFormSubmit = async (formData: C) => {
+	try {
+		if (currentFormData.value?.id) {
+			// 编辑模式
+			if (!props.config.api.update) {
+				ElMessage.warning("未配置更新接口");
+				return;
+			}
+			await props.config.api.update(currentFormData.value.id, formData as unknown as Partial<T>);
+			ElMessage.success("更新成功");
+		} else {
+			// 新增模式
+			if (!props.config.api.create) {
+				ElMessage.warning("未配置新增接口");
+				return;
+			}
+			await props.config.api.create(formData);
+			ElMessage.success("新增成功");
+		}
+		showFormDrawer.value = false;
+		fetchData();
+	} catch {
+		ElMessage.error("操作失败");
+	}
 };
 
 // 初始化加载数据

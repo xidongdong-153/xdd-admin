@@ -33,8 +33,8 @@ export const UserApi = {
 	/**
 	 * 更新用户
 	 */
-	update(data: UserInfo) {
-		return request.patch<UserInfo>(`/api/users/${data.id}`, data);
+	update(id: number, data: Partial<UserInfo>) {
+		return request.patch<UserInfo>(`/api/users/${id}`, data);
 	},
 	/**
 	 * 删除用户

@@ -1,9 +1,10 @@
 import { h } from "vue";
 import { ElTag } from "element-plus";
 import type { ContentListConfig } from "@/components/business/search-list/types";
-import type { UserInfo, UserListRequest } from "@/api/modules/user/types";
+import type { UserInfo, UserListRequest, CreateUser } from "@/api/modules/user/types";
 import { UserApi } from "@/api/modules/user/user-api";
 import { UserStatus } from "../types";
+import { getCreateFormConfig } from "./form.config";
 
 // 状态配置
 export const statusConfig = {
@@ -13,14 +14,13 @@ export const statusConfig = {
 } as const;
 
 // 获取列表配置
-export const getListConfig = (
-	handleEdit: (row: UserInfo) => void,
-	handleDelete: (row: UserInfo) => void,
-): ContentListConfig<UserInfo, UserListRequest> => ({
+export const getListConfig = (): ContentListConfig<UserInfo, UserListRequest, CreateUser> => ({
 	// API 配置
 	api: {
 		getList: UserApi.getList,
 		delete: UserApi.delete,
+		create: UserApi.create,
+		update: UserApi.update,
 	},
 
 	// 查询参数
@@ -46,24 +46,16 @@ export const getListConfig = (
 		{ prop: "createdAt", label: "创建时间", visible: true },
 	],
 
-	// 操作按钮
-	actions: [
-		{
-			label: "编辑",
-			type: "primary",
-			onClick: handleEdit,
-		},
-		{
-			label: "删除",
-			type: "danger",
-			onClick: handleDelete,
-		},
-	],
-
 	// 工具栏配置
 	toolbar: {
 		showAdd: true,
 		showRefresh: true,
 		showColumnSetting: true,
 	},
+
+	// 表单配置
+	formConfig: getCreateFormConfig(),
+
+	// 控制操作列显示
+	showActions: true,
 });

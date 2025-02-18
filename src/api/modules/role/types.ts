@@ -11,7 +11,7 @@ export interface RoleInfo {
 	/** 是否系统角色 */
 	isSystem: boolean;
 	/** 权限列表 */
-	permissions: string[];
+	permissions: number[];
 	/** 用户列表 */
 	users: [];
 	/** 角色描述 */
@@ -26,8 +26,12 @@ export interface RoleInfo {
  * 创建角色
  */
 export interface CreateRole {
+	/** 角色名称 */
 	name: string;
+	/** 角色描述 */
 	description: string;
+	/** 权限列表 */
+	permissions: number[];
 }
 
 /**
@@ -35,7 +39,6 @@ export interface CreateRole {
  */
 export interface RoleListRequest extends PaginationQuery {
 	name?: string;
-	description?: string;
 }
 
 /**
