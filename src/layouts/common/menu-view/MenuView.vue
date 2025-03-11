@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, ref, withDefaults } from "vue";
+import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { MenuViewProps, MenuItem } from "@/layouts/types";
 import { ElMenu } from "element-plus";

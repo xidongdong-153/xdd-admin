@@ -21,6 +21,7 @@
 						v-model="loginForm.credential"
 						placeholder="请输入用户名/邮箱"
 						:prefix-icon="User"
+						@keyup.enter="handleLogin"
 					/>
 				</el-form-item>
 
@@ -95,6 +96,7 @@ const { run: login, loading } = useRequest(AuthApi.login, undefined, {
 		router.replace(redirect || "/");
 	},
 	onError: (error) => {
+		console.log(error);
 		ElMessage.error(error.message || "登录失败");
 	},
 });

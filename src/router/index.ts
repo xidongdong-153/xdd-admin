@@ -13,7 +13,6 @@ import {
 } from "./modules";
 import { setupGuards } from "./guards";
 import type { RouteRecordRaw } from "vue-router";
-import promptTemplateRoutes from "./modules/prompt-template";
 
 const rootRoute = {
 	path: "/",
@@ -33,7 +32,6 @@ const rootRoute = {
 		...roleRoutes,
 		...permissionRoutes,
 		...aboutRoutes,
-		...promptTemplateRoutes,
 	],
 };
 

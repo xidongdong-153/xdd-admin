@@ -7,6 +7,8 @@ import type { RoleInfo } from "@/api/modules/role/types";
 export interface PermissionInfo {
 	/** 权限ID */
 	id: number;
+	/** 权限编码 */
+	code: string;
 	/** 权限名称 */
 	name: string;
 	/** 权限描述 */

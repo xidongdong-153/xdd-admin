@@ -1,5 +1,11 @@
 import { request } from "@/api/core/request";
-import type { CreateUser, UserInfo, UserListRequest, UserListResponse } from "./types";
+import type {
+	CreateUser,
+	UserInfo,
+	UserListRequest,
+	UserListResponse,
+	ChangePasswordRequest,
+} from "./types";
 
 /**
  * 用户 API
@@ -41,5 +47,11 @@ export const UserApi = {
 	 */
 	delete(id: number) {
 		return request.delete<UserInfo>(`/api/users/${id}`);
+	},
+	/**
+	 * 修改密码
+	 */
+	changePassword(id: number, data: ChangePasswordRequest) {
+		return request.post<void>(`/api/users/${id}/change-password`, data);
 	},
 };

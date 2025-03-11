@@ -27,7 +27,7 @@ export default defineConfig({
 		proxy: {
 			// XDD API
 			"/api": {
-				target: "http://localhost:3101", // xdd api 服务地址
+				target: "http://localhost:3100", // xdd api 服务地址
 				changeOrigin: true,
 				// rewrite: (path) => path.replace(/^\/api/, '') // 如果后端接口没有 /api 前缀，需要去掉
 			},

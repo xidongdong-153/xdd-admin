@@ -67,11 +67,12 @@ export class HttpClientImpl implements HttpClient {
 			async (error: AxiosError<ApiError>) => {
 				const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-				// 如果是 401 错误且不是刷新token的请求
+				// 如果是 401 错误且不是刷新token的请求，且不是登录请求
 				if (
 					error.response?.status === 401 &&
 					!originalRequest._retry &&
-					!originalRequest.url?.includes("/api/auth/refresh")
+					!originalRequest.url?.includes("/api/auth/refresh") &&
+					!originalRequest.url?.includes("/api/auth/login")
 				) {
 					originalRequest._retry = true;
 
